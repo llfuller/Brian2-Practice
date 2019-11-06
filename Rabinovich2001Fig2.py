@@ -2,7 +2,7 @@
 from brian2 import *
 import scipy as sp
 n = 9
-duration = 50000*ms
+duration = 200*ms # at and after 141ms, this breaks for neurons 4 and 6. Those neurons explode afterward
 num_samples = int(duration/defaultclock.dt) # 10,000 samples
 # Time-variable external current:
 t_recorded = arange(num_samples)*defaultclock.dt
@@ -33,8 +33,8 @@ for pair in inhibPairs:
 
 eqs = '''
 dv/dt = (v - v**3 /(3) - w - z*(v-nu) + 0.35 + S)/tau1: 1
-dw/dt = (v - b*w + a)/second : 1 
-dz/dt = (gSum*G - z)/tau2 : 1
+dw/dt = (v - b*w + a)/ms : 1 
+dz/dt = (gSumG - z)/tau2 : 1
 tau1 = 0.08 *ms : second # Could be wrong. I don't know if it should be in ms
 tau2 = 3.1 *ms  : second
 a = 0.7 : 1
@@ -43,7 +43,7 @@ nu = -1.5 : 1
 S : 1
 # S = S_recorded(t) : 1
 G = (v>0) : 1
-gSum : 1
+gSumG : 1
 '''
 
 group = NeuronGroup(n, eqs, threshold = 'v > 1.2', method = "rk4")
@@ -52,11 +52,6 @@ group.v = -1.2
 group.w = -0.62
 group.z = 0
 group.S = GivenS
-
-# #Synapses (useless for adding inhibition? My inhibitory equations need to apply outside of just neuron firings...
-# S = Synapses(group, group, on_pre = "v += 0.2*mV")
-# S.connect(condition = 'i!=j')
-
 
 @network_operation(dt=defaultclock.dt) # worry: does this lag a frame behind? Also (separately) see documentation pg124
 def inhibition():
@@ -68,16 +63,14 @@ def inhibition():
     #             sum += multiple
     #     group.gSum[i] = sum
     # The above for loop describes what the following assignment does
-    group.gSum.set_item(slice(None), sp.dot(sp.transpose(g), sp.array(group.G.__array__())))
+    group.gSumG.set_item(slice(None), sp.dot(sp.transpose(g), sp.array(group.G.__array__())))
+    print(group.gSumG)
     # pass
 
 
 monitor = SpikeMonitor(group)
 M = StateMonitor(group, variables=True, record=True)
 run(duration)
-
-# figure()
-# plot(M.t/ms, M.S[0]*(n/10), 'y')
 
 # Plot current
 # plot(M.t/ms, M.G[0]*(n/10)/amp, 'y')
@@ -95,12 +88,14 @@ show()
 # Plot v(t) of neurons
 fig, axs = plt.subplots(n)
 fig.suptitle('V(t) [maybe] over time')
-for i in range(0,n):
+for i in range(n-1,-1,-1):
     axs[i].plot(M.t / ms, M[i].v)
     axs[i].set(ylabel = "V"+str(i+1))
-axs[n-1].set(xlabel = 'time (ms)')
+axs[0].set(xlabel = 'time (ms)')
 # # plot(M.t/ms, M[0].v / mV, color="k")
 # # plot(M.t/ms, M[1].v / mV)
 # # plot(M.t/ms, M[2].v / mV, color="r")
 # plot(t_recorded, S_recorded)
 show()
+
+# Result: neurons 4 and 6 always blow up right at the end

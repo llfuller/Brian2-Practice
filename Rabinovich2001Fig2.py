@@ -4,21 +4,21 @@ import scipy as sp
 n = 9
 duration = 0.3 * second
 num_samples = int(duration/defaultclock.dt) # 10,000 samples
-tau = 10*ms # time constant
 # Time-variable external current:
 t_recorded = arange(num_samples)*defaultclock.dt
-A=10
+A=0.1
 B=0
 f=10/ms
+# S is 'stimulus'
 # Linear Current
-# dvdtExt_recorded = TimedArray(A*t_recorded*mV/(ms*ms)/1000, dt=defaultclock.dt)
+# S_recorded = TimedArray(A*t_recorded*volt/(ms)/1000, dt=defaultclock.dt) # ms term cancels units of t_recorded
 # Current Steps
-# dvdtExt_recorded = TimedArray(A*t_recorded*mV/(ms*ms)/1000//0.1*0.1, dt=defaultclock.dt)
+# S_recorded = TimedArray(A*t_recorded*volt/(ms)/1000//0.1*0.1, dt=defaultclock.dt)
 # Sinusoidal Current
-dvdtExt_recorded = TimedArray(A*cos(B*t_recorded/ms)*(mV/ms), dt=defaultclock.dt)
+S_recorded = TimedArray(A*cos(B*t_recorded/ms)*volt, dt=defaultclock.dt)
 
 print(len(t_recorded))
-print(dvdtExt_recorded.values)
+print(S_recorded.values)
 
 # Inhibitory max amplitude
 g = zeros((n,n)) #needs to be +1,+1 larger than usual (extra row and column) to make the following clean:
@@ -31,25 +31,24 @@ for pair in inhibPairs:
     g[pair[0]-1,pair[1]-1] = 2
 
 eqs = '''
-dv/dt = v/ms - v**3 /(3*mV*mV*ms) - w/ms + dvdtExt - z*(v-nu)/ms : volt
-dw/dt = (v + a - b*w)/tau : volt 
-dz/dt = gSum*G/ms - z/ms : 1
-nu = -1.5*mV : volt
-v0 : volt
-a = 0*mV : volt
-b = 0 : 1
-dvdtExt = dvdtExt_recorded(t) : volt/second
-G = (v>0*mV) : 1
+dv/dt = (v - v**3 /(3*volt*volt) - w - z*(v-nu) + 0.35*volt + S)/tau1: volt
+dw/dt = (v - b*w + a*volt)/second : volt 
+dz/dt = (gSum*G - z)/tau2 : 1
+tau1 = 0.08*second : second 
+tau2 = 3.1*second  : second
+a = 0.7 : 1
+b = 0.8 : 1
+nu = -1.5*volt : volt
+S = S_recorded(t) : volt
+G = (v>0*volt) : 1
 gSum : 1
 '''
 
-group = NeuronGroup(n, eqs, threshold = 'v > 2*mV', reset = 'v = 0*mV', refractory = 5*ms, method = "rk4")
+group = NeuronGroup(n, eqs, threshold = 'v > 2*mV', method = "rk4")
 #initial conditions:
-group.v = 0*mV
-group.w = 0*mV
-# Assign different v0 to each neuron:
-# group.v0 = '5*(i+1)*mV' #use for 3 neurons
-group.v0 = '-1.2*mV'
+group.v = -1.2*mvolt
+group.w = -0.62*mvolt
+group.z = 0
 
 # #Synapses (useless for adding inhibition? My inhibitory equations need to apply outside of just neuron firings...
 # S = Synapses(group, group, on_pre = "v += 0.2*mV")
@@ -67,6 +66,7 @@ def inhibition():
     #     group.gSum[i] = sum
     # The above for loop describes what the following assignment does
     group.gSum.set_item(slice(None), sp.dot(sp.transpose(g), sp.array(group.G.__array__())))
+    # pass
 
 
 monitor = SpikeMonitor(group)
@@ -76,12 +76,12 @@ run(duration)
 
 figure()
 # Plot current
-plot(M.t/ms, M.dvdtExt[0]*(n/10)/amp, 'y')
+plot(M.t/ms, M.S[0]*(n/10)/amp, 'y')
 
 # plot(M.t/ms, M.G[0]*(n/10)/amp, 'y')
 
 # Plot raster of neurons spikes
-for j in range(1,n):
+for j in range(0,n):
     plot(monitor.t/ms, monitor.i, '.k')
 xlabel('spike time (ms)')
 ylabel('neuron index')
@@ -90,13 +90,13 @@ show()
 # # Plot current vs time of neurons
 print("Length of M: "+str(len(M)))
 print(M)
-for i in range(1,n):
-    plot(M.t / ms, M[i].v / mV, label="V"+str(i))
+for i in range(0,n):
+    plot(M.t / ms, M[i].v / volt, label="V"+str(i+1))
 # # plot(M.t/ms, M[0].v / mV, color="k")
 # # plot(M.t/ms, M[1].v / mV)
 # # plot(M.t/ms, M[2].v / mV, color="r")
 xlabel('time (ms)')
-ylabel('voltage (mV)')
+ylabel('voltage (V)')
 legend()
-# plot(t_recorded, dvdtExt_recorded)
+# plot(t_recorded, S_recorded)
 show()

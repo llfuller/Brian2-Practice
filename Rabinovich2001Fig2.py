@@ -2,7 +2,7 @@
 from brian2 import *
 import scipy as sp
 n = 9
-duration = 200*ms
+duration = 50000*ms
 num_samples = int(duration/defaultclock.dt) # 10,000 samples
 # Time-variable external current:
 t_recorded = arange(num_samples)*defaultclock.dt
@@ -68,8 +68,8 @@ def inhibition():
     #             sum += multiple
     #     group.gSum[i] = sum
     # The above for loop describes what the following assignment does
-    # group.gSum.set_item(slice(None), sp.dot(sp.transpose(g), sp.array(group.G.__array__())))
-    pass
+    group.gSum.set_item(slice(None), sp.dot(sp.transpose(g), sp.array(group.G.__array__())))
+    # pass
 
 
 monitor = SpikeMonitor(group)

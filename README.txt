@@ -1,0 +1,1 @@
+Practice building leaky integrate-and-fire and FitzHugh-Nagumo neural networks in Brian2. As a result of using Brian2 guides and tutorials as a reference, it may very closely resemble the guide and tutorial code.

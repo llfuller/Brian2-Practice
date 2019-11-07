@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f09088e7-baca-433a-9d02-8a11154b0aa0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/RabFig2-Attempt1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/RabFig2-Attempt3.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Rabinovich2001Fig2.py" beforeDir="false" afterPath="$PROJECT_DIR$/Rabinovich2001Fig2.py" afterDir="false" />
     </list>
@@ -28,7 +28,11 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1SvgryQhg9Ir6KYDDwwK48nmrYY" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../Rab2000Fig2Creation/Fig2.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -344,13 +348,16 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Nonworking possibly because of dimensional issues in the ODEs." />
     <option name="LAST_COMMIT_MESSAGE" value="Nonworking possibly because of dimensional issues in the ODEs." />
   </component>
